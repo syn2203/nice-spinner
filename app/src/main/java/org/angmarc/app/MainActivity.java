@@ -1,17 +1,11 @@
 package org.angmarc.app;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.view.View;
 import android.widget.Toast;
 
-import org.angmarch.views.NiceSpinner;
-import org.angmarch.views.OnSpinnerItemSelectedListener;
-import org.angmarch.views.SpinnerTextFormatter;
+import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.ArrayList;
+import org.angmarch.views.NiceSpinner;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
