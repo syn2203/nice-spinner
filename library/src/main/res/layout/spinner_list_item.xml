@@ -5,9 +5,8 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:ellipsize="marquee"
-    android:gravity="center"
+    android:gravity="start|center_vertical"
     android:padding="@dimen/one_and_a_half_grid_unit"
     android:singleLine="true"
     android:textSize="15sp"
-    tools:text="Item"
-    tools:textColor="@android:color/black" />
+    tools:text="Item" />

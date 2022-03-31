@@ -18,6 +18,7 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -30,26 +31,9 @@ import android.widget.PopupWindow;
 import android.widget.ListPopupWindow;
 import android.widget.ListView;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
-/*
- * Copyright (C) 2015 Angelo Marchesin.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 public class NiceSpinner extends AppCompatTextView {
 
     private static final int MAX_LEVEL = 10000;
@@ -140,44 +124,38 @@ public class NiceSpinner extends AppCompatTextView {
         Resources resources = getResources();
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.NiceSpinner);
         int defaultPadding = resources.getDimensionPixelSize(R.dimen.one_and_a_half_grid_unit);
-
         setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
-        setPadding(resources.getDimensionPixelSize(R.dimen.three_grid_unit), defaultPadding, defaultPadding,
-                defaultPadding);
+        setPadding(resources.getDimensionPixelSize(R.dimen.three_grid_unit), defaultPadding, defaultPadding, defaultPadding);
         setClickable(true);
-        backgroundSelector = typedArray.getResourceId(R.styleable.NiceSpinner_backgroundSelector, R.drawable.selector);
-        setBackgroundResource(backgroundSelector);
-        textColor = typedArray.getColor(R.styleable.NiceSpinner_textTint, getDefaultTextColor(context));
+        backgroundSelector = typedArray.getColor(R.styleable.NiceSpinner_backgroundSelector, typedArray.getColor(0, Color.BLACK));
+        setBackgroundColor(backgroundSelector);
+        textColor = typedArray.getColor(R.styleable.NiceSpinner_textTint, typedArray.getColor(0, Color.WHITE));
         setTextColor(textColor);
         popupWindow = new ListPopupWindow(context);
-        popupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // The selected item is not displayed within the list, so when the selected position is equal to
-                // the one of the currently selected item it gets shifted to the next item.
-                if (position >= selectedIndex && position < adapter.getCount()) {
-                    position++;
-                }
-                selectedIndex = position;
+        popupWindow.setOnItemClickListener((parent, view, position, id) -> {
+            // The selected item is not displayed within the list, so when the selected position is equal to
+            // the one of the currently selected item it gets shifted to the next item.
+//            if (position >= selectedIndex && position < adapter.getCount()) {
+//                position++;
+//            }
+            selectedIndex = position;
 
-                if (onSpinnerItemSelectedListener != null) {
-                    onSpinnerItemSelectedListener.onItemSelected(NiceSpinner.this, view, position, id);
-                }
-
-                if (onItemClickListener != null) {
-                    onItemClickListener.onItemClick(parent, view, position, id);
-                }
-
-                if (onItemSelectedListener != null) {
-                    onItemSelectedListener.onItemSelected(parent, view, position, id);
-                }
-
-                adapter.setSelectedIndex(position);
-
-                setTextInternal(adapter.getItemInDataset(position));
-
-                dismissDropDown();
+            if (onSpinnerItemSelectedListener != null) {
+                onSpinnerItemSelectedListener.onItemSelected(NiceSpinner.this, view, position, id);
             }
+
+            if (onItemClickListener != null) {
+                onItemClickListener.onItemClick(parent, view, position, id);
+            }
+
+            if (onItemSelectedListener != null) {
+                onItemSelectedListener.onItemSelected(parent, view, position, id);
+            }
+
+            adapter.setSelectedIndex(position);
+            setTextInternal(adapter.getItemInDataset(position));
+
+            dismissDropDown();
         });
 
         popupWindow.setModal(true);
@@ -194,11 +172,8 @@ public class NiceSpinner extends AppCompatTextView {
         isArrowHidden = typedArray.getBoolean(R.styleable.NiceSpinner_hideArrow, false);
         arrowDrawableTint = typedArray.getColor(R.styleable.NiceSpinner_arrowTint, getResources().getColor(android.R.color.black));
         arrowDrawableResId = typedArray.getResourceId(R.styleable.NiceSpinner_arrowDrawable, R.drawable.arrow);
-        dropDownListPaddingBottom =
-                typedArray.getDimensionPixelSize(R.styleable.NiceSpinner_dropDownListPaddingBottom, 0);
-        horizontalAlignment = PopUpTextAlignment.fromId(
-                typedArray.getInt(R.styleable.NiceSpinner_popupTextAlignment, PopUpTextAlignment.CENTER.ordinal())
-        );
+        dropDownListPaddingBottom = typedArray.getDimensionPixelSize(R.styleable.NiceSpinner_dropDownListPaddingBottom, 0);
+        horizontalAlignment = PopUpTextAlignment.fromId(typedArray.getInt(R.styleable.NiceSpinner_popupTextAlignment, PopUpTextAlignment.CENTER.ordinal()));
 
         CharSequence[] entries = typedArray.getTextArray(R.styleable.NiceSpinner_entries);
         if (entries != null) {
@@ -206,9 +181,7 @@ public class NiceSpinner extends AppCompatTextView {
         }
 
         typedArray.recycle();
-
         measureDisplayHeight();
-
     }
 
     private void measureDisplayHeight() {
@@ -270,10 +243,8 @@ public class NiceSpinner extends AppCompatTextView {
 
     private int getDefaultTextColor(Context context) {
         TypedValue typedValue = new TypedValue();
-        context.getTheme()
-                .resolveAttribute(android.R.attr.textColorPrimary, typedValue, true);
-        TypedArray typedArray = context.obtainStyledAttributes(typedValue.data,
-                new int[]{android.R.attr.textColorPrimary});
+        context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue, true);
+        TypedArray typedArray = context.obtainStyledAttributes(typedValue.data, new int[]{android.R.attr.textColorPrimary});
         int defaultTextColor = typedArray.getColor(0, Color.BLACK);
         typedArray.recycle();
         return defaultTextColor;
@@ -327,8 +298,6 @@ public class NiceSpinner extends AppCompatTextView {
         }
     }
 
-
-
     /**
      * @deprecated use setOnSpinnerItemSelectedListener instead.
      */
@@ -351,8 +320,7 @@ public class NiceSpinner extends AppCompatTextView {
     }
 
     public void setAdapter(ListAdapter adapter) {
-        this.adapter = new NiceSpinnerAdapterWrapper(getContext(), adapter, textColor, backgroundSelector,
-                spinnerTextFormatter, horizontalAlignment);
+        this.adapter = new NiceSpinnerAdapterWrapper(getContext(), adapter, textColor, backgroundSelector, spinnerTextFormatter, horizontalAlignment);
         setAdapterInternal(this.adapter);
     }
 
@@ -403,14 +371,13 @@ public class NiceSpinner extends AppCompatTextView {
         popupWindow.setAnchorView(this);
         popupWindow.show();
         final ListView listView = popupWindow.getListView();
-        if(listView != null) {
+        if (listView != null) {
             listView.setVerticalScrollBarEnabled(false);
             listView.setHorizontalScrollBarEnabled(false);
             listView.setVerticalFadingEdgeEnabled(false);
             listView.setHorizontalFadingEdgeEnabled(false);
         }
     }
-
 
     private int getPopUpHeight() {
         return Math.max(verticalSpaceBelow(), verticalSpaceAbove());
@@ -466,22 +433,15 @@ public class NiceSpinner extends AppCompatTextView {
         this.selectedTextFormatter = textFormatter;
     }
 
-
-    public void performItemClick( int position,boolean showDropdown) {
-        if(showDropdown) showDropDown();
+    public void performItemClick(int position, boolean showDropdown) {
+        if (showDropdown) showDropDown();
         setSelectedIndex(position);
     }
 
-    /**
-     * only applicable when popup is shown .
-     * @param view
-     * @param position
-     * @param id
-     */
     public void performItemClick(View view, int position, int id) {
         showDropDown();
         final ListView listView = popupWindow.getListView();
-        if(listView != null) {
+        if (listView != null) {
             listView.performItemClick(view, position, id);
         }
     }
@@ -493,7 +453,5 @@ public class NiceSpinner extends AppCompatTextView {
     public void setOnSpinnerItemSelectedListener(OnSpinnerItemSelectedListener onSpinnerItemSelectedListener) {
         this.onSpinnerItemSelectedListener = onSpinnerItemSelectedListener;
     }
-
-
 }
 
